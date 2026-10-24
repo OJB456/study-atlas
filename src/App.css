@@ -68,7 +68,7 @@
 .view-panel { min-height: 500px; }
 .view-panel-enter { animation: page-enter 220ms ease-out both; }
 .view-loading { display: grid; min-height: 300px; place-items: center; color: var(--muted); font-family: Fraunces, serif; font-size: 17px; }
-@keyframes page-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes page-enter { from { opacity: 0; } to { opacity: 1; } }
 @keyframes tab-indicator-enter { from { transform: scaleX(.2); transform-origin: left; } to { transform: scaleX(1); transform-origin: left; } }
 @keyframes modal-enter { from { opacity: 0; transform: translateY(16px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes digit-enter { from { opacity: .75; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -225,6 +225,7 @@
 .timeline-item strong { font-family: Fraunces, serif; font-size: 12px; font-weight: 500; }
 .timeline-item small { color: var(--muted); font-size: 8px; }
 .view-bottom-actions { display: flex; justify-content: space-between; margin-top: 14px; color: var(--muted); font-size: 8px; }
+.view-bottom-actions .text-link { min-height: 46px; }
 
 .week-top-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(225px, .75fr); gap: 15px; }
 .week-matrix-panel { min-width: 0; padding: 19px; }
@@ -420,6 +421,7 @@ kbd { padding: 2px 4px; border: 1px solid var(--line); border-radius: 3px; font-
 .file-button { position: relative; overflow: hidden; }
 .file-button input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .settings-bottom { justify-content: space-between; margin-top: 11px; }
+.settings-bottom .text-danger { min-height: 46px; }
 .settings-bottom > div { display: flex; align-items: center; gap: 5px; }
 .text-danger { padding: 5px 4px; border: 0; background: transparent; color: #bd3d29; cursor: pointer; font-size: 9px; }
 .toast { position: fixed; right: 25px; bottom: 23px; z-index: 30; display: flex; max-width: min(400px, calc(100vw - 32px)); align-items: center; gap: 9px; padding: 12px 15px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--paper-bright); box-shadow: 4px 5px 0 rgba(20, 16, 11, .13); color: var(--ink); font-size: 10px; }
