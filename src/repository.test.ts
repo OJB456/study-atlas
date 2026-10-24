@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { openDB } from 'idb'
+import { newActivity } from './model'
 import { EMPTY_TIMER, type FocusSession, type TaskRecord } from './model'
 import { IndexedDBRepository } from './repository'
 
@@ -40,5 +42,41 @@ describe('IndexedDB persistence contract', () => {
     expect(await repository.finalizeTimer(finalizedTimer, { ...session, id: 'duplicate' })).toBe(false)
     expect((await repository.getTimer()).phase).toBe('idle')
     expect(await repository.listSessions()).toHaveLength(1)
+  })
+
+  it('backs up legacy minute data, migrates durations to seconds once, and reads it without loss', async () => {
+    const name = `study-atlas-legacy-${databaseNumber}`
+    const old = await openDB(name, 1, { upgrade(db) {
+      db.createObjectStore('activities', { keyPath: 'id' }); db.createObjectStore('tasks', { keyPath: 'id' })
+      db.createObjectStore('sessions', { keyPath: 'id' }); db.createObjectStore('timers', { keyPath: 'activityId' })
+      db.createObjectStore('meta'); db.createObjectStore('outbox', { keyPath: 'id' })
+    } })
+    const activity = newActivity('Legacy reading', { id: 'legacy', defaultDuration: 25, dailyTargetMinutes: 45 })
+    await old.put('activities', activity)
+    await old.put('meta', { ...((await import('./model')).DEFAULT_SETTINGS), dailyGoalMinutes: 120 }, 'settings')
+    await old.put('meta', true, 'seeded')
+    const session: FocusSession = { id: 'legacy-session', activityId: 'legacy', localDate: '2026-10-24', startedAt: '2026-10-24T10:00:00.000Z', endedAt: '2026-10-24T10:25:00.000Z', plannedMs: 1500000, actualMs: 1499000, discarded: false }
+    await old.put('sessions', session)
+    await old.close()
+
+    const migrated = new IndexedDBRepository(name)
+    await migrated.initialize()
+    const storage = await openDB(name, 2)
+    const storedActivity = await storage.get('activities', 'legacy') as unknown as Record<string, unknown>
+    const storedSession = await storage.get('sessions', 'legacy-session') as unknown as Record<string, unknown>
+    const storedSettings = await storage.get('meta', 'settings') as Record<string, unknown>
+    const backup = await storage.get('backups', 'before-duration-seconds-v2')
+    expect(storedActivity.defaultDurationSeconds).toBe(1500)
+    expect(storedActivity.dailyTargetSeconds).toBe(2700)
+    expect('defaultDuration' in storedActivity).toBe(false)
+    expect(storedSession.actualSeconds).toBe(1499)
+    expect('actualMs' in storedSession).toBe(false)
+    expect(storedSettings.dailyGoalSeconds).toBe(7200)
+    expect((backup.snapshot.activities as Array<Record<string, unknown>>)[0]?.defaultDuration).toBe(25)
+    expect((await migrated.listActivities()).find((item) => item.id === 'legacy')?.defaultDuration).toBe(25)
+    expect((await migrated.listSessions())[0]?.actualMs).toBe(1499000)
+    await migrated.initialize()
+    expect((await storage.get('backups', 'before-duration-seconds-v2'))?.createdAt).toBe(backup.createdAt)
+    await storage.close()
   })
 })

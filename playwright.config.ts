@@ -10,7 +10,12 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'iphone-14-webkit', use: { ...devices['iPhone 14'], browserName: 'webkit' } },
+    { name: 'iphone-15-webkit', use: { ...devices['iPhone 15'], browserName: 'webkit' } },
+    { name: 'pixel-7-chromium', use: { ...devices['Pixel 7'], browserName: 'chromium' } },
+  ],
   webServer: {
     command: process.platform === 'win32' ? 'npm.cmd run dev -- --host 127.0.0.1 --port 4173 --strictPort' : 'npm run dev -- --host 127.0.0.1 --port 4173 --strictPort',
     url: 'http://127.0.0.1:4173',

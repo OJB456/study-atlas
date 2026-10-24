@@ -13,13 +13,14 @@ export interface AtlasStore {
   timer: TimerState
   pausedTimers: TimerState[]
   settings: AppSettings
-  now: number
   hydrate(): Promise<void>
-  setNow(value: number): void
+  addActivity(activity: Activity): Promise<void>
   saveActivity(activity: Activity): Promise<void>
   deleteActivity(id: string): Promise<void>
   toggleTask(activityId: string, localDate: string): Promise<void>
   skipTask(activityId: string, localDate: string): Promise<void>
+  updateSession(session: FocusSession): Promise<void>
+  deleteSession(id: string): Promise<void>
   startTimer(activity: Activity, durationMinutes: number): Promise<string | null>
   pauseTimer(): Promise<void>
   resetTimer(): Promise<void>
@@ -56,7 +57,6 @@ export const useAtlas = create<AtlasStore>((set, get) => ({
   timer: EMPTY_TIMER,
   pausedTimers: [],
   settings: DEFAULT_SETTINGS,
-  now: Date.now(),
 
   async hydrate() {
     const repository = await createRepository()
@@ -64,17 +64,29 @@ export const useAtlas = create<AtlasStore>((set, get) => ({
     const [activities, tasks, sessions, timer, pausedTimers, settings] = await Promise.all([
       repository.listActivities(), repository.listTasks(), repository.listSessions(), repository.getTimer(), repository.listPausedTimers(), repository.getSettings(),
     ])
-    set({ repository, activities: activities.sort((a, b) => a.order - b.order), tasks, sessions, timer, pausedTimers, settings, ready: true, now: Date.now() })
+    set({ repository, activities: activities.sort((a, b) => a.order - b.order), tasks, sessions, timer, pausedTimers, settings, ready: true })
   },
 
-  setNow(value) { set({ now: value }) },
+  async addActivity(activity) {
+    const repository = get().repository
+    if (!repository) throw new Error('The atlas is still loading.')
+    const updated = { ...activity, updatedAt: new Date().toISOString() }
+    await repository.putActivity(updated)
+    set((state) => ({ activities: [...state.activities.filter((item) => item.id !== updated.id), updated].sort((a, b) => a.order - b.order) }))
+  },
 
   async saveActivity(activity) {
     const repository = get().repository
     if (!repository) return
+    const previous = get().activities.find((item) => item.id === activity.id)
     const updated = { ...activity, updatedAt: new Date().toISOString() }
-    await repository.putActivity(updated)
     set((state) => ({ activities: [...state.activities.filter((item) => item.id !== updated.id), updated].sort((a, b) => a.order - b.order) }))
+    try {
+      await repository.putActivity(updated)
+    } catch (error) {
+      set((state) => ({ activities: [...state.activities.filter((item) => item.id !== updated.id), ...(previous ? [previous] : [])].sort((a, b) => a.order - b.order) }))
+      throw error
+    }
   },
 
   async deleteActivity(id) {
@@ -105,8 +117,23 @@ export const useAtlas = create<AtlasStore>((set, get) => ({
     set((state) => ({ tasks: [...state.tasks.filter((task) => task.id !== next.id), next] }))
   },
 
+  async updateSession(session) {
+    const repository = get().repository
+    if (!repository) return
+    await repository.putSession(session)
+    set((state) => ({ sessions: [...state.sessions.filter((item) => item.id !== session.id), session] }))
+  },
+
+  async deleteSession(id) {
+    const repository = get().repository
+    if (!repository) return
+    await repository.deleteSession(id)
+    set((state) => ({ sessions: state.sessions.filter((item) => item.id !== id) }))
+  },
+
   async startTimer(activity, durationMinutes) {
-    const { repository, settings, now } = get()
+    const { repository, settings } = get()
+    const now = Date.now()
     if (!repository) return null
     const result = await repository.activateTimer(activity.id, localDateAt(now, settings.timezone), durationMinutes, now, makeId())
     const pausedTimers = await repository.listPausedTimers()
@@ -117,7 +144,8 @@ export const useAtlas = create<AtlasStore>((set, get) => ({
   },
 
   async pauseTimer() {
-    const { repository, timer, now } = get()
+    const { repository, timer } = get()
+    const now = Date.now()
     if (!repository || timer.phase !== 'running') return
     const next = pauseTimerState(timer, now)
     await repository.putTimer(next)
@@ -126,7 +154,8 @@ export const useAtlas = create<AtlasStore>((set, get) => ({
   },
 
   async resetTimer() {
-    const { repository, timer, now } = get()
+    const { repository, timer } = get()
+    const now = Date.now()
     if (!repository || timer.phase === 'idle') return
     const next = resetTimerState(timer, now)
     await repository.putTimer(next)

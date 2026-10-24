@@ -7,11 +7,11 @@ test('create an activity, finish a focus timer, then reload persisted history', 
 
   await page.getByRole('button', { name: /Add activity/ }).click()
   await page.getByLabel('Activity name').fill('E2E reading sprint')
-  await page.getByLabel('Default session').fill('1')
+  await page.getByLabel('Default session duration').fill('1')
   await page.getByRole('button', { name: 'Add to atlas' }).click()
   await expect(page.getByText('E2E reading sprint', { exact: true }).first()).toBeVisible()
 
-  await page.getByLabel('Custom duration in minutes').fill('1')
+  await page.getByLabel('Custom timer duration').fill('1')
   await page.getByRole('button', { name: 'Start focusing' }).click()
   await expect(page.getByText('IN THE GROOVE')).toBeVisible()
   await page.clock.fastForward(61_000)

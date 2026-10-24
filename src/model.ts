@@ -1,4 +1,7 @@
 export type ThemePreference = 'system' | 'light' | 'dark'
+export type DurationUnit = 'seconds' | 'minutes' | 'hours'
+export type TimerDisplayFormat = 'mm:ss' | 'hh:mm:ss' | 'adaptive'
+export type JoyLevel = 'full' | 'calm' | 'off'
 
 export interface Activity {
   id: string
@@ -62,6 +65,10 @@ export interface AppSettings {
   theme: ThemePreference
   muted: boolean
   dailyGoalMinutes: number
+  defaultInputUnit: DurationUnit
+  timerDisplayFormat: TimerDisplayFormat
+  timerPresetsSeconds: number[]
+  joyLevel: JoyLevel
   weekStartsOn: 0 | 1
   lastBackupAt: string | null
 }
@@ -75,6 +82,7 @@ export interface Repository {
   putTask(task: TaskRecord): Promise<void>
   listSessions(): Promise<FocusSession[]>
   putSession(session: FocusSession): Promise<void>
+  deleteSession(id: string): Promise<void>
   finalizeTimer(timer: TimerState, session: FocusSession | null): Promise<boolean>
   getTimer(): Promise<TimerState>
   putTimer(timer: TimerState): Promise<void>
@@ -102,6 +110,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
   theme: 'system',
   muted: false,
   dailyGoalMinutes: 120,
+  defaultInputUnit: 'minutes',
+  timerDisplayFormat: 'adaptive',
+  timerPresetsSeconds: [900, 1500, 2700, 3600],
+  joyLevel: 'full',
   weekStartsOn: 1,
   lastBackupAt: null,
 }

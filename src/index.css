@@ -20,43 +20,58 @@
   -moz-osx-font-smoothing: grayscale;
   font-optical-sizing: auto;
   font-weight: 400;
-  --paper: #f4efe6;
-  --paper-bright: #fbf9f3;
-  --paper-deep: #ece5d8;
-  --ink: #17140f;
-  --ink-soft: #4f4a42;
-  --muted: #827b6f;
-  --line: #d9d1c4;
-  --line-strong: #81796d;
+  --paper: #f5eedf;
+  --paper-bright: #fffaf0;
+  --paper-deep: #ebe1d0;
+  --ink: #28221f;
+  --ink-soft: #514843;
+  --muted: #766d65;
+  --line: #d5c9b9;
+  --line-strong: #3c342e;
   --coral: #ff4f2e;
   --cobalt: #2b3bff;
   --butter: #ffd84d;
-  --mint: #55b58e;
-  --shadow: 3px 4px 0 rgba(44, 38, 27, .11);
-  --shadow-small: 2px 2px 0 rgba(44, 38, 27, .1);
+  --lilac: #c9b6ff;
+  --mint: #9be7c4;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow: 4px 4px 0 rgba(40, 34, 31, .14);
+  --shadow-small: 3px 3px 0 rgba(40, 34, 31, .12);
+  --motion-fast: 140ms;
+  --motion-normal: 220ms;
+  --ease-spring: cubic-bezier(.2, .9, .2, 1.15);
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --paper: #0f0e17;
-  --paper-bright: #191824;
-  --paper-deep: #23212e;
-  --ink: #f0ede6;
-  --ink-soft: #c2bdc2;
-  --muted: #938e9d;
-  --line: #383545;
-  --line-strong: #777185;
-  --coral: #ff775b;
-  --cobalt: #7582ff;
-  --butter: #eacb64;
-  --mint: #76d1a9;
-  --shadow: 3px 4px 0 rgba(0, 0, 0, .23);
-  --shadow-small: 2px 2px 0 rgba(0, 0, 0, .2);
+  --paper: #211b27;
+  --paper-bright: #2b2431;
+  --paper-deep: #39303e;
+  --ink: #f9f0df;
+  --ink-soft: #d9cbbb;
+  --muted: #b0a298;
+  --line: #4d414e;
+  --line-strong: #e0cdb5;
+  --coral: #ff7658;
+  --cobalt: #8191ff;
+  --butter: #f6d461;
+  --lilac: #c9b6ff;
+  --mint: #9be7c4;
+  --shadow: 4px 4px 0 rgba(5, 3, 9, .28);
+  --shadow-small: 3px 3px 0 rgba(5, 3, 9, .24);
 }
 
 * { box-sizing: border-box; }
-html { min-width: 320px; background: var(--paper); }
-body { min-width: 320px; min-height: 100vh; margin: 0; }
+html { min-width: 320px; background: var(--paper); overflow-x: clip; }
+body { min-width: 320px; min-height: 100dvh; margin: 0; overflow-x: clip; }
 body::before { position: fixed; inset: 0; z-index: 10; pointer-events: none; content: ''; opacity: .12; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E"); }
 button, input, select { font: inherit; }
 button { color: inherit; }
